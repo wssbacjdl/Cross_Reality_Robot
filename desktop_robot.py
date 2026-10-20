@@ -34,7 +34,21 @@ try:
         result = detector.detect_emotions(frame)
         
         if result:
-            top_emotion = max(result[0]["emotions"], key=result[0]["emotions"].get)
+                    # 获取所有的情绪得分字典
+        emotions = result[0]["emotions"]
+        
+        # 设定一个阈值（0.7表示必须有70%的把握是开心，才算开心）
+        threshold = 0.7
+        
+        # 只有当“开心”的得分大于0.7时，我们才认定它是 happy
+        if emotions['happy'] > threshold:
+            top_emotion = 'happy'
+        else:
+            # 如果没达到0.7，就看谁分最高（可能是neutral，也可能是sad）
+            top_emotion = max(emotions, key=emotions.get)
+            # 但为了防止它明明是在微微笑却被认成生气，我们强制让不够开心的都显示 neutral
+            if top_emotion == 'happy' and emotions['happy'] <= threshold:
+                top_emotion = 'neutral' 
             box = result[0]["box"]
             x, y, w, h = box
             
